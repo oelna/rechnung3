@@ -1,0 +1,180 @@
+export const APP_SCHEMA_VERSION = 'rechnung3.document.v1';
+
+const now = () => new Date().toISOString();
+const id = (prefix) => (crypto.randomUUID ? crypto.randomUUID() : `${prefix}-${Date.now()}-${Math.random()}`);
+
+export function createPage() {
+	return {
+		id: id('page'),
+		name: 'Page',
+		order: 0,
+		size: {
+			width: 210,
+			height: 297,
+			unit: 'mm',
+		},
+		frames: [],
+	};
+}
+
+export function createFrame(type = 'text', patch = {}) {
+	const base = {
+		id: id('frame'),
+		type,
+		x: 25,
+		y: 30,
+		width: 80,
+		height: 35,
+		zIndex: 1,
+		locked: false,
+		style: {
+			fontFamily: 'system-ui',
+			fontSize: 10,
+			fontWeight: 400,
+			lineHeight: 1.35,
+			textAlign: 'left',
+		},
+		content: {},
+	};
+
+	if (type === 'text') {
+		base.content = {
+			html: 'Double-click to edit text',
+		};
+	}
+
+	if (type === 'table') {
+		base.width = 160;
+		base.height = 70;
+		base.content = {
+			columns: [
+				{ id: id('col'), width: 70, label: 'Description' },
+				{ id: id('col'), width: 20, label: 'Qty' },
+				{ id: id('col'), width: 30, label: 'Price' },
+				{ id: id('col'), width: 30, label: 'Total' },
+			],
+			rows: [
+				{
+					id: id('row'),
+					cells: [
+						{ value: 'Design work' },
+						{ value: '1' },
+						{ value: '100' },
+						{ formula: '=B1*C1' },
+					],
+				},
+				{
+					id: id('row'),
+					kind: 'subtotal',
+					cells: [
+						{ value: 'Subtotal' },
+						{ value: '' },
+						{ value: '' },
+						{ formula: '=SUM(D1)' },
+					],
+				},
+			],
+			discount: {
+				type: 'none',
+				value: 0,
+			},
+			carryLabel: 'Subtotal carried forward',
+		};
+	}
+
+	if (type === 'girocode') {
+		base.width = 35;
+		base.height = 35;
+		base.content = {
+			name: 'Recipient',
+			iban: '',
+			bic: '',
+			amount: '',
+			currency: 'EUR',
+			reason: 'Invoice payment',
+		};
+	}
+
+	return Object.assign(base, patch);
+}
+
+export function createDocument() {
+	const page = createPage();
+	const doc = {
+		id: id('doc'),
+		schemaVersion: APP_SCHEMA_VERSION,
+		title: 'Untitled invoice',
+		createdAt: now(),
+		updatedAt: now(),
+		settings: {
+			grid: {
+				enabled: true,
+				size: 5,
+				snap: true,
+			},
+			guides: {
+				margins: {
+					top: 20,
+					right: 15,
+					bottom: 20,
+					left: 25,
+				},
+			},
+		},
+		pages: [page],
+		invoice: {
+			invoiceNumber: '',
+			invoiceDate: new Date().toISOString().slice(0, 10),
+			currency: 'EUR',
+		},
+	};
+
+	page.frames.push(createFrame('text', {
+		x: 25,
+		y: 20,
+		width: 90,
+		height: 20,
+		content: {
+			html: '<strong>Invoice</strong>',
+		},
+	}));
+	page.frames.push(createFrame('table', {
+		x: 25,
+		y: 70,
+	}));
+
+	return normalizeDocument(doc);
+}
+
+export function normalizeDocument(doc) {
+	doc.schemaVersion ||= APP_SCHEMA_VERSION;
+	doc.id ||= id('doc');
+	doc.title ||= 'Untitled invoice';
+	doc.pages ||= [createPage()];
+
+	doc.pages.forEach((page, pageIndex) => {
+		page.id ||= id('page');
+		page.order = pageIndex;
+		page.size ||= { width: 210, height: 297, unit: 'mm' };
+		page.frames ||= [];
+
+		page.frames.forEach((frame, frameIndex) => {
+			frame.id ||= id('frame');
+			frame.zIndex ??= frameIndex + 1;
+			frame.style ||= {};
+			frame.content ||= {};
+		});
+	});
+
+	doc.updatedAt ||= now();
+	return doc;
+}
+
+export function touch(doc) {
+	doc.updatedAt = now();
+	return doc;
+}
+
+export function cloneDocument(doc) {
+	return JSON.parse(JSON.stringify(doc));
+}
