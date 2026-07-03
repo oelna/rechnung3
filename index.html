@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rechnung3 Layout Invoice Editor</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/editor.css">
+  <link rel="stylesheet" href="css/document.css">
+  <link rel="stylesheet" href="css/print.css">
+</head>
+<body class="mode-edit">
+  <div id="app" class="app-shell">
+    <header class="editor-ui topbar">
+      <strong>Rechnung3</strong>
+      <button id="newDocument">New invoice</button>
+      <button id="saveDocument">Save</button>
+      <select id="documentList" title="Saved documents"></select>
+      <button id="exportJson">Download JSON</button>
+      <label class="file-button">Open JSON <input id="importJson" type="file" accept="application/json"></label>
+      <button id="printDocument">Print / PDF</button>
+      <button id="togglePreview">Preview</button>
+      <span id="saveStatus" class="status">Unsaved</span>
+    </header>
+
+    <main id="workspace" class="workspace">
+      <section id="documentCanvas" class="document-canvas" aria-label="Invoice document"></section>
+    </main>
+
+    <aside class="editor-ui inspector" id="editorInspector" aria-label="Editor palettes">
+      <div class="inspector-handle">Palettes</div>
+      <details class="palette-section" open>
+        <summary>Pages</summary>
+        <div id="pageList" class="page-list"></div>
+        <div class="button-grid">
+          <button id="addPage">Add page</button>
+          <button id="duplicatePage">Duplicate</button>
+          <button id="deletePage">Delete</button>
+        </div>
+      </details>
+
+      <details class="palette-section" open>
+        <summary>Frames</summary>
+        <div class="button-grid">
+          <button data-add-frame="text">Text frame</button>
+          <button data-add-frame="table">Table frame</button>
+          <button data-add-frame="girocode">Girocode</button>
+          <button data-delete-frame>Delete frame</button>
+          <button data-duplicate-frame>Duplicate frame</button>
+        </div>
+      </details>
+
+      <details class="palette-section" open>
+        <summary>Transform</summary>
+        <div class="form-grid compact-form">
+          <label>X mm <input data-transform="x" type="number" step="0.5"></label>
+          <label>Y mm <input data-transform="y" type="number" step="0.5"></label>
+          <label>W mm <input data-transform="width" type="number" step="0.5"></label>
+          <label>H mm <input data-transform="height" type="number" step="0.5"></label>
+          <label>Z <input data-transform="zIndex" type="number" step="1"></label>
+          <label class="inline-check"><input data-transform="locked" type="checkbox"> Locked</label>
+        </div>
+      </details>
+
+      <details class="palette-section" open>
+        <summary>Type</summary>
+        <div class="form-grid compact-form">
+          <label>Size pt <input data-type-style="fontSize" type="number" step="1"></label>
+          <label>Weight <select data-type-style="fontWeight"><option>300</option><option selected>400</option><option>500</option><option>600</option><option>700</option></select></label>
+          <label>Line <input data-type-style="lineHeight" type="number" step="0.05"></label>
+          <label>Align <select data-type-style="textAlign"><option>left</option><option>center</option><option>right</option></select></label>
+        </div>
+      </details>
+
+      <details class="palette-section" open>
+        <summary>Table</summary>
+        <div class="button-grid">
+          <button data-table-action="add-row-before">Insert row before</button>
+          <button data-table-action="add-row-after">Insert row after</button>
+          <button data-table-action="delete-row">Delete row</button>
+          <button data-table-action="add-column-before">Insert col before</button>
+          <button data-table-action="add-column-after">Insert col after</button>
+          <button data-table-action="delete-column">Delete col</button>
+        </div>
+        <label class="full-width">Selected cell <span id="cellRef">—</span><input id="cellInput" placeholder="Text, number, or =SUM(A1:A3)"></label>
+        <label class="full-width">Subtotal carry label <input id="carryLabel" value="Subtotal carried forward"></label>
+        <div class="button-grid">
+          <button data-table-action="mark-subtotal">Mark subtotal row</button>
+          <button data-table-action="clear-subtotal">Clear subtotal row</button>
+        </div>
+        <fieldset>
+          <legend>Discount</legend>
+          <label>Type <select id="discountType"><option value="none">None</option><option value="percent">Percent</option><option value="amount">Amount</option></select></label>
+          <label>Value <input id="discountValue" type="number" step="0.01"></label>
+        </fieldset>
+      </details>
+    </aside>
+  </div>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
