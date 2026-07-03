@@ -120,6 +120,10 @@ function syncPalettes() {
 	$('#discountType').value = tableFrame?.content.discount?.type || 'none';
 	$('#discountValue').value = tableFrame?.content.discount?.value || 0;
 	$('#carryLabel').value = tableFrame?.content.carryLabel || 'Subtotal carried forward';
+
+	$$('[data-margin]').forEach((input) => {
+		input.value = doc.settings.guides.margins[input.dataset.margin] ?? '';
+	});
 }
 
 function mmFromPx(px) {
@@ -269,10 +273,34 @@ function setCellInput(cell, value) {
 	}
 }
 
+$$('[data-margin]').forEach((input) => {
+	input.oninput = () => {
+		doc.settings.guides.margins[input.dataset.margin] = Number(input.value) || 0;
+		changed();
+	};
+});
+
+$$('[data-transform]').forEach((input) => {
+	input.addEventListener('keydown', (event) => {
+		if (!event.shiftKey || (event.key !== 'ArrowUp' && event.key !== 'ArrowDown')) {
+			return;
+		}
+
+		event.preventDefault();
+		const direction = event.key === 'ArrowUp' ? 1 : -1;
+		input.value = String((Number(input.value) || 0) + direction * 10);
+		input.dispatchEvent(new Event('input', { bubbles: true }));
+	});
+});
+
+
 $$('[data-add-frame]').forEach((button) => {
 	button.onclick = () => {
 		const page = selectedPage(doc);
-		const frame = createFrame(button.dataset.addFrame, { zIndex: page.frames.length + 1 });
+		const frame = createFrame(button.dataset.addFrame, {
+			zIndex: page.frames.length + 1,
+			x: doc.settings.guides.margins.left,
+		});
 		page.frames.push(frame);
 		selectFrame(page.id, frame.id);
 		changed();
@@ -574,13 +602,22 @@ $('#closePreview').onclick = () => setPreview(false);
 
 $$('.palette').forEach((palette) => {
 	let paletteDrag = null;
-	const handle = palette.querySelector('.palette-handle');
+	const details = palette.querySelector('details');
+	const handle = palette.querySelector('summary');
+	let didDragPalette = false;
+	handle.addEventListener('click', (event) => {
+		if (didDragPalette) {
+			event.preventDefault();
+			didDragPalette = false;
+		}
+	});
 	handle.onmousedown = (event) => {
 		paletteDrag = {
 			x: event.clientX,
 			y: event.clientY,
 			left: palette.offsetLeft,
 			top: palette.offsetTop,
+			open: details.open,
 		};
 	};
 
@@ -589,8 +626,13 @@ $$('.palette').forEach((palette) => {
 			return;
 		}
 
+		if (Math.abs(event.clientX - paletteDrag.x) > 3 || Math.abs(event.clientY - paletteDrag.y) > 3) {
+			didDragPalette = true;
+		}
+
 		palette.style.left = `${paletteDrag.left + event.clientX - paletteDrag.x}px`;
 		palette.style.top = `${paletteDrag.top + event.clientY - paletteDrag.y}px`;
+		details.open = paletteDrag.open;
 		palette.style.right = 'auto';
 		palette.style.bottom = 'auto';
 	});

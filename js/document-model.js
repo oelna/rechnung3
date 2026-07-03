@@ -3,6 +3,13 @@ export const APP_SCHEMA_VERSION = 'rechnung3.document.v1';
 const now = () => new Date().toISOString();
 const id = (prefix) => (crypto.randomUUID ? crypto.randomUUID() : `${prefix}-${Date.now()}-${Math.random()}`);
 
+export const DEFAULT_MARGINS = {
+	top: 20,
+	right: 15,
+	bottom: 20,
+	left: 25,
+};
+
 export function createPage() {
 	return {
 		id: id('page'),
@@ -21,7 +28,7 @@ export function createFrame(type = 'text', patch = {}) {
 	const base = {
 		id: id('frame'),
 		type,
-		x: 25,
+		x: patch.x ?? DEFAULT_MARGINS.left,
 		y: 30,
 		width: 80,
 		height: 35,
@@ -39,7 +46,7 @@ export function createFrame(type = 'text', patch = {}) {
 
 	if (type === 'text') {
 		base.content = {
-			html: 'Double-click to edit text',
+			html: '',
 		};
 	}
 
@@ -48,29 +55,28 @@ export function createFrame(type = 'text', patch = {}) {
 		base.height = 70;
 		base.content = {
 			columns: [
-				{ id: id('col'), width: 70, label: 'Description' },
-				{ id: id('col'), width: 20, label: 'Qty' },
-				{ id: id('col'), width: 30, label: 'Price' },
-				{ id: id('col'), width: 30, label: 'Total' },
+				{ id: id('col'), width: 40 },
+				{ id: id('col'), width: 40 },
+				{ id: id('col'), width: 40 },
+				{ id: id('col'), width: 40 },
 			],
 			rows: [
 				{
 					id: id('row'),
 					cells: [
-						{ value: 'Design work' },
-						{ value: '1' },
-						{ value: '100' },
-						{ formula: '=B1*C1' },
+						{ value: '' },
+						{ value: '' },
+						{ value: '' },
+						{ value: '' },
 					],
 				},
 				{
 					id: id('row'),
-					kind: 'subtotal',
 					cells: [
-						{ value: 'Subtotal' },
 						{ value: '' },
 						{ value: '' },
-						{ formula: '=SUM(D1)' },
+						{ value: '' },
+						{ value: '' },
 					],
 				},
 			],
@@ -100,6 +106,7 @@ export function createFrame(type = 'text', patch = {}) {
 
 export function createDocument() {
 	const page = createPage();
+	const margins = { ...DEFAULT_MARGINS };
 	const doc = {
 		id: id('doc'),
 		schemaVersion: APP_SCHEMA_VERSION,
@@ -113,12 +120,7 @@ export function createDocument() {
 				snap: true,
 			},
 			guides: {
-				margins: {
-					top: 20,
-					right: 15,
-					bottom: 20,
-					left: 25,
-				},
+				margins,
 			},
 		},
 		pages: [page],
@@ -130,17 +132,17 @@ export function createDocument() {
 	};
 
 	page.frames.push(createFrame('text', {
-		x: 25,
-		y: 20,
+		x: margins.left,
+		y: margins.top,
 		width: 90,
 		height: 20,
 		content: {
-			html: '<strong>Invoice</strong>',
+			html: '',
 		},
 	}));
 	page.frames.push(createFrame('table', {
-		x: 25,
-		y: 70,
+		x: margins.left,
+		y: margins.top + 50,
 	}));
 
 	return normalizeDocument(doc);
@@ -150,6 +152,9 @@ export function normalizeDocument(doc) {
 	doc.schemaVersion ||= APP_SCHEMA_VERSION;
 	doc.id ||= id('doc');
 	doc.title ||= 'Untitled invoice';
+	doc.settings ||= {};
+	doc.settings.guides ||= {};
+	doc.settings.guides.margins ||= { ...DEFAULT_MARGINS };
 	doc.pages ||= [createPage()];
 
 	doc.pages.forEach((page, pageIndex) => {

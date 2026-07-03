@@ -10,7 +10,10 @@
 .page::before {
 	content: "";
 	position: absolute;
-	inset: 20mm 15mm;
+	top: var(--margin-top, 20mm);
+	right: var(--margin-right, 15mm);
+	bottom: var(--margin-bottom, 20mm);
+	left: var(--margin-left, 25mm);
 	border: 1px dotted #ddd;
 	pointer-events: none;
 }

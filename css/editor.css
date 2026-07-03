@@ -145,29 +145,21 @@ legend {
 	border: 1px solid #7d756b;
 	border-radius: 6px;
 	box-shadow: 0 8px 24px #0007;
-	padding: .5rem;
+	padding: 0;
 }
 
-.palette-handle {
-	margin: -.5rem -.5rem .5rem;
-	padding: .45rem .6rem;
-	background: #383838;
-	color: #fff;
-	cursor: move;
-	user-select: none;
-	font-weight: 700;
-}
-
-.palette details {
+.palette > details {
 	margin: 0;
 }
 
 .palette summary {
-	cursor: pointer;
+	cursor: move;
 	font-weight: 700;
-	padding: .25rem;
+	padding: .45rem .6rem;
 	user-select: none;
 	list-style: none;
+	background: #383838;
+	color: #fff;
 }
 
 .palette summary::-webkit-details-marker {
@@ -177,7 +169,7 @@ legend {
 .palette-body {
 	display: grid;
 	gap: .55rem;
-	padding-top: .45rem;
+	padding: .65rem;
 }
 
 .page-list {
@@ -230,14 +222,13 @@ legend {
 
 .drag-handle {
 	position: absolute;
-	left: -1px;
-	top: -18px;
-	height: 17px;
-	min-width: 72px;
-	padding: 1px 5px;
-	background: var(--accent);
-	color: white;
-	border-radius: 3px 3px 0 0;
+	left: -5px;
+	top: -5px;
+	width: 12px;
+	height: 12px;
+	background: #777;
+	border: 1px solid white;
+	border-radius: 2px;
 	cursor: move;
 	pointer-events: auto;
 	user-select: none;
@@ -300,4 +291,21 @@ tr.insert-target td {
 	background: #f1f1f1;
 	padding: .05rem .25rem;
 	border-radius: 3px;
+}
+
+.mode-preview .page::before,
+.mode-preview .frame-ui,
+.mode-preview .resize-handle,
+.mode-preview .drag-handle,
+.mode-preview .col-resize-handle,
+.mode-preview .overflow-warning {
+	display: none !important;
+}
+
+.mode-preview .frame {
+	outline: 0 !important;
+}
+
+.mode-preview .frame-table td {
+	border-color: transparent;
 }

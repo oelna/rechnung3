@@ -1,8 +1,9 @@
-import { displayCell, formatNumber, tableTotal } from './table-formulas.js';
+import { displayCell } from './table-formulas.js';
 
 export function renderDocument(doc, sel) {
 	const root = document.querySelector('#documentCanvas');
 	root.innerHTML = '';
+	sel.documentSettings = doc.settings;
 	doc.pages.forEach((page) => root.append(renderPage(page, sel)));
 }
 
@@ -10,6 +11,11 @@ function renderPage(page, sel) {
 	const el = document.createElement('article');
 	el.className = 'page';
 	el.dataset.pageId = page.id;
+	const margins = sel.documentSettings?.guides?.margins || {};
+	el.style.setProperty('--margin-top', `${margins.top ?? 20}mm`);
+	el.style.setProperty('--margin-right', `${margins.right ?? 15}mm`);
+	el.style.setProperty('--margin-bottom', `${margins.bottom ?? 20}mm`);
+	el.style.setProperty('--margin-left', `${margins.left ?? 25}mm`);
 
 	[...page.frames]
 		.sort((a, b) => a.zIndex - b.zIndex)
@@ -29,7 +35,7 @@ function applyGeometry(el, frame) {
 }
 
 function frameChrome() {
-	return '<div class="frame-ui"><div class="drag-handle" title="Drag to move frame">move frame</div></div><div class="resize-handle" title="Resize frame"></div>';
+	return '<div class="frame-ui"><div class="drag-handle" title="Drag to move frame"></div></div><div class="resize-handle" title="Resize frame"></div>';
 }
 
 function renderFrame(frame, pageId, sel) {
@@ -82,7 +88,6 @@ function renderTable(el, frame, sel) {
 	});
 
 	table.append(colgroup);
-	table.append(renderTableHeader(frame));
 
 	frame.content.rows.forEach((row, rowIndex) => {
 		const tr = document.createElement('tr');
@@ -103,6 +108,14 @@ function renderTable(el, frame, sel) {
 			td.contentEditable = true;
 			td.textContent = displayCell(frame.content, rowIndex, columnIndex);
 
+			if (rowIndex === 0) {
+				const handle = document.createElement('span');
+				handle.className = 'col-resize-handle';
+				handle.dataset.col = columnIndex;
+				handle.contentEditable = 'false';
+				td.append(handle);
+			}
+
 			if (sel.cell?.frameId === frame.id && sel.cell.row === rowIndex && sel.cell.col === columnIndex) {
 				td.classList.add('is-selected');
 			}
@@ -113,50 +126,8 @@ function renderTable(el, frame, sel) {
 		table.append(tr);
 	});
 
-	appendDiscountAndTotalRows(table, frame.content);
 	el.append(table);
 	appendOverflowHints(el, frame);
-}
-
-function renderTableHeader(frame) {
-	const head = document.createElement('tr');
-
-	frame.content.columns.forEach((column, index) => {
-		const th = document.createElement('th');
-		th.dataset.col = index;
-		th.contentEditable = true;
-		th.textContent = column.label || '';
-
-		const handle = document.createElement('span');
-		handle.className = 'col-resize-handle';
-		handle.dataset.col = index;
-		handle.contentEditable = 'false';
-		th.append(handle);
-
-		head.append(th);
-	});
-
-	return head;
-}
-
-function appendDiscountAndTotalRows(table, content) {
-	const discount = content.discount || { type: 'none' };
-
-	if (discount.type !== 'none') {
-		const tr = document.createElement('tr');
-		tr.className = 'table-discount-row';
-		const baseTotal = tableTotal({ ...content, discount: { type: 'none' } });
-		const discountValue = discount.type === 'percent'
-			? baseTotal * (Number(discount.value) || 0) / 100
-			: Number(discount.value) || 0;
-		tr.innerHTML = `<td colspan="${Math.max(1, content.columns.length - 1)}">Discount ${discount.type === 'percent' ? `${discount.value}%` : ''}</td><td>-${formatNumber(discountValue)}</td>`;
-		table.append(tr);
-	}
-
-	const tr = document.createElement('tr');
-	tr.className = 'table-total-row';
-	tr.innerHTML = `<td colspan="${Math.max(1, content.columns.length - 1)}">Total</td><td>${formatNumber(tableTotal(content))}</td>`;
-	table.append(tr);
 }
 
 function appendOverflowHints(el, frame) {

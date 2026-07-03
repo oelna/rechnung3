@@ -85,6 +85,95 @@ function rangeSum(table, startReference, endReference, seen) {
 	return sum;
 }
 
+
+function splitArguments(input) {
+	const args = [];
+	let depth = 0;
+	let current = '';
+
+	for (const char of input) {
+		if (char === '(') {
+			depth++;
+		}
+
+		if (char === ')') {
+			depth--;
+		}
+
+		if (char === ',' && depth === 0) {
+			args.push(current.trim());
+			current = '';
+			continue;
+		}
+
+		current += char;
+	}
+
+	if (current.trim()) {
+		args.push(current.trim());
+	}
+
+	return args;
+}
+
+function sumArgument(table, argument, seen) {
+	const range = argument.match(/^([A-Z]+\d+):([A-Z]+\d+)$/);
+
+	if (range) {
+		return rangeSum(table, range[1], range[2], seen);
+	}
+
+	const reference = parseReference(argument);
+
+	if (reference) {
+		return rawCell(table, reference.row, reference.column, new Set(seen));
+	}
+
+	return Number(evalSafe(replaceCellReferences(argument, table, seen))) || 0;
+}
+
+function replaceCellReferences(expr, table, seen) {
+	return expr.replace(/([A-Z]+)(\d+)/g, (_, column, row) => String(rawCell(table, Number(row) - 1, columnIndex(column), new Set(seen))));
+}
+
+function replaceFunctionCalls(expr, name, replacer) {
+	let index = 0;
+	let output = '';
+	const needle = `${name}(`;
+
+	while (index < expr.length) {
+		const start = expr.indexOf(needle, index);
+
+		if (start === -1) {
+			output += expr.slice(index);
+			break;
+		}
+
+		output += expr.slice(index, start);
+		let depth = 1;
+		let end = start + needle.length;
+
+		while (end < expr.length && depth > 0) {
+			if (expr[end] === '(') {
+				depth++;
+			} else if (expr[end] === ')') {
+				depth--;
+			}
+			end++;
+		}
+
+		if (depth !== 0) {
+			throw new Error('function paren');
+		}
+
+		const inner = expr.slice(start + needle.length, end - 1);
+		output += replacer(inner);
+		index = end;
+	}
+
+	return output;
+}
+
 export function evaluateFormula(input, table, seen = new Set()) {
 	try {
 		let expr = String(input || '').trim().replace(/^=/, '').toUpperCase();
@@ -93,14 +182,18 @@ export function evaluateFormula(input, table, seen = new Set()) {
 			return displayReference(table, expr, seen);
 		}
 
-		expr = expr.replace(/SUM\(([A-Z]+\d+):([A-Z]+\d+)\)/g, (_, start, end) => String(rangeSum(table, start, end, seen)));
-		expr = expr.replace(/SUM\(([A-Z]+\d+)\)/g, (_, reference) => {
-			const parsed = parseReference(reference);
-			return String(rawCell(table, parsed.row, parsed.column, new Set(seen)));
+		expr = replaceFunctionCalls(expr, 'SUM', (inner) => {
+			const total = splitArguments(inner).reduce((sum, argument) => sum + sumArgument(table, argument, seen), 0);
+			return String(total);
 		});
-		expr = expr.replace(/ROUND\(([^,]+),(\d+)\)/g, (_, value, digits) => String(Number(evalSafe(value)).toFixed(Number(digits))));
-		expr = expr.replace(/([A-Z]+)(\d+)/g, (_, column, row) => String(rawCell(table, Number(row) - 1, columnIndex(column), new Set(seen))));
 
+		expr = replaceFunctionCalls(expr, 'ROUND', (inner) => {
+			const [valueExpression, digits = '0'] = splitArguments(inner);
+			const numericExpression = replaceCellReferences(valueExpression, table, seen);
+			return String(Number(evalSafe(numericExpression)).toFixed(Number(digits)));
+		});
+
+		expr = replaceCellReferences(expr, table, seen);
 		return evalSafe(expr);
 	} catch {
 		return '#ERR';
