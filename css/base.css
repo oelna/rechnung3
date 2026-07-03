@@ -1,0 +1,55 @@
+:root {
+	--bg: #2f3136;
+	--panel: #f4f1ea;
+	--ink: #222;
+	--accent: #4f7cff;
+	--line: #c8c1b7;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--ink);
+	font: 14px/1.35 system-ui, -apple-system, Segoe UI, sans-serif;
+}
+
+button,
+select,
+input {
+	font: inherit;
+}
+
+button,
+.file-button {
+	border: 1px solid #8e877e;
+	background: #fff;
+	color: #111;
+	padding: .2rem .45rem;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+button:hover {
+	border-color: var(--accent);
+}
+
+input,
+select {
+	border: 1px solid #aaa;
+	border-radius: 3px;
+	padding: .2rem .35rem;
+	background: #fff;
+}
+
+.file-button input {
+	display: none;
+}
+
+.status {
+	margin-left: auto;
+	color: #eee;
+}

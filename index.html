@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Rechnung3 Layout Invoice Editor</title>
+	<link rel="stylesheet" href="css/base.css">
+	<link rel="stylesheet" href="css/editor.css">
+	<link rel="stylesheet" href="css/document.css">
+	<link rel="stylesheet" href="css/print.css">
+</head>
+<body class="mode-edit">
+	<div id="app" class="app-shell">
+		<header class="editor-ui topbar">
+			<strong>Rechnung3</strong>
+			<label class="document-title-label">Title <input id="documentTitle" type="text" aria-label="Document title"></label>
+			<button id="newDocument">New Document</button>
+			<button id="saveDocument">Save</button>
+			<select id="documentList" title="Saved documents"></select>
+			<button id="exportJson">Download</button>
+			<label class="file-button">Open JSON <input id="importJson" type="file" accept="application/json"></label>
+			<button id="printDocument">Print / PDF</button>
+			<button id="togglePreview">Preview</button>
+			<span id="saveStatus" class="status">Unsaved</span>
+		</header>
+
+		<button id="closePreview" class="editor-ui preview-close" title="Exit preview">× Close preview</button>
+
+		<main id="workspace" class="workspace">
+			<section id="documentCanvas" class="document-canvas" aria-label="Invoice document"></section>
+		</main>
+
+		<aside class="editor-ui palette" id="palettePages" style="left: 16px; top: 64px;">
+			<details open>
+				<summary>Pages</summary>
+				<div class="palette-body">
+					<div id="pageList" class="page-list"></div>
+					<div class="button-grid">
+						<button id="addPage">Add page</button>
+						<button id="duplicatePage">Duplicate</button>
+						<button id="deletePage">Delete</button>
+					</div>
+					<fieldset>
+						<legend>Page margins</legend>
+						<div class="form-grid">
+							<label>Top mm <input data-margin="top" type="number" step="0.5"></label>
+							<label>Bottom mm <input data-margin="bottom" type="number" step="0.5"></label>
+							<label>Left mm <input data-margin="left" type="number" step="0.5"></label>
+							<label>Right mm <input data-margin="right" type="number" step="0.5"></label>
+						</div>
+					</fieldset>
+				</div>
+			</details>
+		</aside>
+
+		<aside class="editor-ui palette" id="paletteFrames" style="right: 16px; top: 64px;">
+			<details open>
+				<summary>Frames</summary>
+				<div class="palette-body button-grid">
+					<button data-add-frame="text">Text frame</button>
+					<button data-add-frame="table">Table frame</button>
+					<button data-add-frame="girocode">Girocode</button>
+					<button data-delete-frame>Delete frame</button>
+					<button data-duplicate-frame>Duplicate frame</button>
+				</div>
+			</details>
+		</aside>
+
+		<aside class="editor-ui palette" id="paletteTransform" style="right: 16px; top: 245px;">
+			<details open>
+				<summary>Transform</summary>
+				<div class="palette-body transform-grid">
+					<label class="transform-x">X mm <input data-transform="x" type="number" step="0.5"></label>
+					<label class="transform-y">Y mm <input data-transform="y" type="number" step="0.5"></label>
+					<label class="transform-width">W mm <input data-transform="width" type="number" step="0.5"></label>
+					<label class="transform-height">H mm <input data-transform="height" type="number" step="0.5"></label>
+					<label class="transform-z">Z <input data-transform="zIndex" type="number" step="1"></label>
+					<label class="transform-page">Parent Page <select id="framePage"></select></label>
+					<label class="inline-check transform-locked"><input data-transform="locked" type="checkbox"> Locked</label>
+				</div>
+			</details>
+		</aside>
+
+		<aside class="editor-ui palette" id="paletteTypography" style="right: 16px; top: 445px;">
+			<details open>
+				<summary>Typography</summary>
+				<div class="palette-body form-grid">
+					<label class="full-width">Font <select data-type-style="fontFamily">
+						<option value="system-ui, -apple-system, Segoe UI, sans-serif">System UI Font</option>
+						<option value="Helvetica, Arial, sans-serif">Helvetica/Arial</option>
+						<option value="Tahoma, sans-serif">Tahoma</option>
+						<option value="Verdana, sans-serif">Verdana</option>
+						<option value="Georgia, serif">Georgia</option>
+						<option value="'Times New Roman', Times, serif">Times New Roman</option>
+						<option value="Courier New, Courier, monospace">Courier New</option>
+					</select></label>
+					<label>Size pt <input data-type-style="fontSize" type="number" step="1"></label>
+					<label>Weight <select data-type-style="fontWeight">
+						<option value="100">100 Thin</option>
+						<option value="200">200 Extra Light</option>
+						<option value="300">300 Light</option>
+						<option value="400" selected>400 Regular</option>
+						<option value="500">500 Medium</option>
+						<option value="600">600 Semi Bold</option>
+						<option value="700">700 Bold</option>
+						<option value="800">800 Extra Bold</option>
+						<option value="900">900 Black</option>
+					</select></label>
+					<label>Line <input data-type-style="lineHeight" type="number" step="0.05"></label>
+					<label>Align <select data-type-style="textAlign"><option>left</option><option>center</option><option>right</option></select></label>
+				</div>
+			</details>
+		</aside>
+
+		<aside class="editor-ui palette" id="paletteTable" style="left: 16px; bottom: 16px; width: 380px;">
+			<details open>
+				<summary>Table</summary>
+				<div class="palette-body">
+					<div class="button-grid">
+						<button data-table-action="add-row-before">Insert row before</button>
+						<button data-table-action="add-row-after">Insert row after</button>
+						<button data-table-action="delete-row">Delete row</button>
+						<button data-table-action="move-row-up">Move row up</button>
+						<button data-table-action="move-row-down">Move row down</button>
+						<button data-table-action="add-column-before">Insert col before</button>
+						<button data-table-action="add-column-after">Insert col after</button>
+						<button data-table-action="delete-column">Delete col</button>
+						<button data-table-action="move-column-left">Move col left</button>
+						<button data-table-action="move-column-right">Move col right</button>
+					</div>
+					<button type="button" popovertarget="formulaHelp">Formula help</button>
+					<label class="full-width">Selected cell <span id="cellRef">—</span><input id="cellInput" placeholder="Text, number, or =SUM(A1:A3,B1)"></label>
+					<label class="full-width">Subtotal carry label <input id="carryLabel" value="Subtotal carried forward"></label>
+					<div class="button-grid">
+						<button data-table-action="mark-subtotal">Mark subtotal row</button>
+						<button data-table-action="clear-subtotal">Clear subtotal row</button>
+					</div>
+					<fieldset>
+						<legend>Discount</legend>
+						<label>Type <select id="discountType"><option value="none">None</option><option value="percent">Percent</option><option value="amount">Amount</option></select></label>
+						<label>Value <input id="discountValue" type="number" step="0.01"></label>
+					</fieldset>
+				</div>
+			</details>
+		</aside>
+
+		<div id="formulaHelp" class="formula-popover" popover>
+			<h2>Table formula examples</h2>
+			<p>Start formulas with <code>=</code>. Cell references use Excel-like columns and row numbers such as <code>A1</code>, <code>B2</code>, and <code>D4</code>.</p>
+			<ul>
+				<li><code>=B1*C1</code> multiplies two cells.</li>
+				<li><code>=A4</code> mirrors another cell's displayed value.</li>
+				<li><code>=SUM(D1:D4,B1,C3,D3)</code> sums ranges and individual cells.</li>
+				<li><code>=SUM(A4)</code> sums one cell.</li>
+				<li><code>=ROUND(B1*C1, 2)</code> rounds to two decimals.</li>
+			</ul>
+		</div>
+	</div>
+	<script type="module" src="js/main.js"></script>
+</body>
+</html>
