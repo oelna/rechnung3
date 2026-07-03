@@ -1,0 +1,117 @@
+.page {
+	position: relative;
+	width: 210mm;
+	height: 297mm;
+	background: white;
+	box-shadow: 0 5px 30px #0009;
+	overflow: hidden;
+}
+
+.page::before {
+	content: "";
+	position: absolute;
+	top: var(--margin-top, 20mm);
+	right: var(--margin-right, 15mm);
+	bottom: var(--margin-bottom, 20mm);
+	left: var(--margin-left, 25mm);
+	border: 1px dotted #ddd;
+	pointer-events: none;
+}
+
+.frame {
+	position: absolute;
+	overflow: hidden;
+	background: transparent;
+	outline: 1px dashed #c6c6c6;
+}
+
+.text-editor {
+	min-height: 100%;
+	padding: 1mm;
+	outline: none;
+}
+
+.text-editor div,
+.text-editor p,
+.table-cell div,
+.table-cell p {
+	margin: .45em 0;
+}
+
+.text-editor br,
+.table-cell br {
+	line-height: 1.1;
+}
+
+.frame-text {
+	white-space: normal;
+}
+
+.frame-table table {
+	width: 100%;
+	height: 100%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+.frame-table td,
+.frame-table th {
+	position: relative;
+	border: 1px dashed #d2d2d2;
+	padding: .55mm .8mm;
+	vertical-align: top;
+	height: calc(var(--cell-lines, 1) * 1lh + 1.1mm);
+	min-height: calc(1lh + 1.1mm);
+	white-space: pre-wrap;
+}
+
+.frame-table th {
+	font-weight: 600;
+	background: #f7f7f7;
+}
+
+.table-total-row {
+	font-weight: 700;
+}
+
+.table-discount-row {
+	color: #8a3b00;
+}
+
+.table-subtotal-row {
+	font-weight: 700;
+	background: #f9f9f9;
+}
+
+.girocode-box {
+	height: 100%;
+	display: grid;
+	place-items: center;
+	text-align: center;
+	border: 1px solid #222;
+	font-size: 10pt;
+}
+
+.girocode-qr {
+	font-size: 36pt;
+	line-height: 1;
+}
+
+.overflow-warning {
+	position: absolute;
+	right: 1mm;
+	bottom: 1mm;
+	background: #ffd34d;
+	color: #422;
+	padding: .5mm 1mm;
+	font-size: 8pt;
+	border-radius: 2px;
+}
+
+.page-break-carry {
+	font-size: 9pt;
+	font-weight: 700;
+	border-top: 1px solid #333;
+	margin-top: 1mm;
+	padding-top: 1mm;
+}
