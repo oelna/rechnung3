@@ -46,7 +46,8 @@
 	grid-template-areas:
 		"x width"
 		"y height"
-		"z locked";
+		"z page"
+		"locked locked";
 	gap: .4rem;
 }
 
@@ -68,6 +69,10 @@
 
 .transform-z {
 	grid-area: z;
+}
+
+.transform-page {
+	grid-area: page;
 }
 
 .transform-locked {
@@ -182,8 +187,8 @@ legend {
 }
 
 .page-thumb {
-	width: 54px;
-	height: 76px;
+	width: 30px;
+	height: 42px;
 	border: 1px solid #aaa;
 	background: #fff;
 	padding: .25rem;
@@ -196,7 +201,7 @@ legend {
 }
 
 .page-thumb.is-selected {
-	outline: 2px solid var(--accent);
+	background: #e6e6e6;
 }
 
 .page-thumb.drag-over {

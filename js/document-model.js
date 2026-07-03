@@ -35,7 +35,7 @@ export function createFrame(type = 'text', patch = {}) {
 		zIndex: 1,
 		locked: false,
 		style: {
-			fontFamily: 'system-ui',
+			fontFamily: 'system-ui, -apple-system, Segoe UI, sans-serif',
 			fontSize: 10,
 			fontWeight: 400,
 			lineHeight: 1.35,
@@ -52,7 +52,7 @@ export function createFrame(type = 'text', patch = {}) {
 
 	if (type === 'table') {
 		base.width = 160;
-		base.height = 70;
+		base.height = 12;
 		base.content = {
 			columns: [
 				{ id: id('col'), width: 40 },

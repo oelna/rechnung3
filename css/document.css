@@ -31,6 +31,18 @@
 	outline: none;
 }
 
+.text-editor div,
+.text-editor p,
+.table-cell div,
+.table-cell p {
+	margin: .45em 0;
+}
+
+.text-editor br,
+.table-cell br {
+	line-height: 1.1;
+}
+
 .frame-text {
 	white-space: normal;
 }
@@ -46,9 +58,9 @@
 .frame-table th {
 	position: relative;
 	border: 1px dashed #d2d2d2;
-	padding: 1.2mm;
+	padding: .55mm .8mm;
 	vertical-align: top;
-	min-height: 6mm;
+	min-height: 4mm;
 }
 
 .frame-table th {

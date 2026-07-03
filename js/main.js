@@ -102,6 +102,13 @@ function syncPalettes() {
 		}
 	});
 
+	const framePageSelect = $('#framePage');
+	framePageSelect.innerHTML = doc.pages
+		.map((page, index) => `<option value="${page.id}">Page ${index + 1}</option>`)
+		.join('');
+	framePageSelect.disabled = !frame;
+	framePageSelect.value = frame ? selection.pageId : '';
+
 	$$('[data-type-style]').forEach((input) => {
 		input.disabled = !frame || frame.type !== 'text';
 
@@ -121,7 +128,11 @@ function syncPalettes() {
 	$('#discountValue').value = tableFrame?.content.discount?.value || 0;
 	$('#carryLabel').value = tableFrame?.content.carryLabel || 'Subtotal carried forward';
 
-	$$('[data-margin]').forEach((input) => {
+	$('#framePage').onchange = (event) => {
+	moveSelectedFrameToPage(event.target.value);
+};
+
+$$('[data-margin]').forEach((input) => {
 		input.value = doc.settings.guides.margins[input.dataset.margin] ?? '';
 	});
 }
@@ -263,6 +274,32 @@ function findFrame(frameId) {
 	return doc.pages.flatMap((page) => page.frames).find((frame) => frame.id === frameId);
 }
 
+function moveSelectedFrameToPage(pageId) {
+	if (!selection.frameId || pageId === selection.pageId) {
+		return;
+	}
+
+	const sourcePage = doc.pages.find((page) => page.id === selection.pageId);
+	const targetPage = doc.pages.find((page) => page.id === pageId);
+
+	if (!sourcePage || !targetPage) {
+		return;
+	}
+
+	const frameIndex = sourcePage.frames.findIndex((frame) => frame.id === selection.frameId);
+
+	if (frameIndex === -1) {
+		return;
+	}
+
+	const [frame] = sourcePage.frames.splice(frameIndex, 1);
+	frame.zIndex = targetPage.frames.length + 1;
+	targetPage.frames.push(frame);
+	selectFrame(targetPage.id, frame.id);
+	changed();
+}
+
+
 function setCellInput(cell, value) {
 	if (value.startsWith('=')) {
 		cell.formula = value;
@@ -272,6 +309,10 @@ function setCellInput(cell, value) {
 		delete cell.formula;
 	}
 }
+
+$('#framePage').onchange = (event) => {
+	moveSelectedFrameToPage(event.target.value);
+};
 
 $$('[data-margin]').forEach((input) => {
 	input.oninput = () => {
@@ -426,7 +467,14 @@ function tableAction(action) {
 		delete table.rows[cell.row].kind;
 	}
 
+	fitTableFrame(frame);
 	changed();
+}
+
+function fitTableFrame(frame) {
+	if (frame?.type === 'table') {
+		frame.height = Math.max(8, frame.content.rows.length * 5 + 2);
+	}
 }
 
 function newRow(table) {
