@@ -30,6 +30,8 @@
 
 .workspace {
 	padding: 72px 32px 64px;
+	width: 100vw;
+	height: 100vh;
 	min-height: 100vh;
 	overflow: auto;
 }
@@ -39,6 +41,8 @@
 	flex-direction: column;
 	align-items: center;
 	gap: 22px;
+	min-width: max-content;
+	padding-inline: 12vw;
 }
 
 .button-grid {
@@ -138,18 +142,6 @@ legend {
 	padding-top: 24px;
 }
 
-.document-title-label {
-	display: flex;
-	align-items: center;
-	gap: .3rem;
-	font-size: 12px;
-	color: #ddd;
-}
-
-.document-title-label input {
-	width: 13rem;
-}
-
 .preview-close {
 	display: none;
 	position: fixed;
@@ -169,7 +161,7 @@ legend {
 	min-width: 230px;
 	max-width: min(90vw, 680px);
 	max-height: calc(100vh - 72px);
-	overflow: visible;
+	overflow: hidden;
 	resize: both;
 	background: var(--panel);
 	border: 1px solid #7d756b;
@@ -238,54 +230,69 @@ legend {
 
 .frame-ui {
 	position: absolute;
-	left: 0;
-	top: 0;
-	right: 0;
-	height: 0;
-	display: none;
+	inset: 0;
+	display: block;
 	pointer-events: none;
 	color: var(--accent);
 	font-size: 11px;
 	z-index: 5;
+	opacity: .35;
+	transition: opacity .12s ease;
 }
 
 .frame.is-selected > .frame-ui {
-	display: block;
+	opacity: 1;
 }
 
-.drag-handle {
+.drag-handle,
+.resize-handle {
 	position: absolute;
-	left: -5px;
-	top: -5px;
-	width: 12px;
-	height: 12px;
-	background: #777;
-	border: 1px solid white;
-	border-radius: 2px;
-	cursor: move;
+	width: 15px;
+	height: 15px;
+	background: #ddd;
+	border: 1px solid #999;
+	border-radius: 3px;
 	pointer-events: auto;
 	user-select: none;
 }
 
-.resize-handle {
-	position: absolute;
-	width: 10px;
-	height: 10px;
-	right: -5px;
-	bottom: -5px;
+.drag-handle:hover,
+.resize-handle:hover {
 	background: var(--accent);
-	border: 1px solid white;
+	border-color: var(--accent);
+}
+
+.drag-handle {
+	left: 0;
+	top: 0;
+	cursor: move;
+}
+
+.resize-handle {
+	right: 0;
+	bottom: 0;
 	cursor: nwse-resize;
 }
 
 .col-resize-handle {
 	position: absolute;
 	top: 0;
-	right: -2px;
-	width: 3px;
+	right: -4px;
+	display: none;
+	width: 9px;
 	height: 100%;
 	cursor: col-resize;
 	background: #ddd;
+	border-inline: 1px solid #999;
+}
+
+.frame.is-selected .col-resize-handle {
+	display: block;
+}
+
+.col-resize-handle:hover {
+	background: var(--accent);
+	border-color: var(--accent);
 }
 
 .frame.is-selected {

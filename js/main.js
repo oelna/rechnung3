@@ -53,7 +53,7 @@ function renderPages() {
 		const button = document.createElement('button');
 		button.className = `page-thumb${selection.pageId === page.id ? ' is-selected' : ''}`;
 		button.draggable = true;
-		button.innerHTML = `<span>Page<br>${index + 1}</span>`;
+		button.innerHTML = `<span>${index + 1}</span>`;
 		button.title = `${index + 1}. ${page.name || 'Page'} — drag to reorder`;
 		button.onclick = () => {
 			selectPage(page.id);
@@ -135,11 +135,7 @@ function syncPalettes() {
 	$('#discountValue').value = tableFrame?.content.discount?.value || 0;
 	$('#carryLabel').value = tableFrame?.content.carryLabel || 'Subtotal carried forward';
 
-	$('#framePage').onchange = (event) => {
-	moveSelectedFrameToPage(event.target.value);
-};
-
-$$('[data-margin]').forEach((input) => {
+	$$('[data-margin]').forEach((input) => {
 		input.value = doc.settings.guides.margins[input.dataset.margin] ?? '';
 	});
 }
@@ -163,6 +159,8 @@ $('#documentCanvas').addEventListener('mousedown', (event) => {
 	}
 
 	selectFrame(frameElement.dataset.pageId, frameElement.dataset.frameId);
+	$$('.frame.is-selected').forEach((item) => item.classList.remove('is-selected'));
+	frameElement.classList.add('is-selected');
 	const frame = selectedFrame(doc);
 
 	if (event.target.classList.contains('resize-handle')) {

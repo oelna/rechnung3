@@ -35,7 +35,7 @@ function applyGeometry(el, frame) {
 }
 
 function frameChrome() {
-	return '<div class="frame-ui"><div class="drag-handle" title="Drag to move frame"></div></div><div class="resize-handle" title="Resize frame"></div>';
+	return '<div class="frame-ui"><div class="drag-handle" title="Drag to move frame"></div><div class="resize-handle" title="Resize frame"></div></div>';
 }
 
 function renderFrame(frame, pageId, sel) {
